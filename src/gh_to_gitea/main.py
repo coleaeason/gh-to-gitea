@@ -87,7 +87,9 @@ def cb(
 def mirror(
     ctx: typer.Context,
     repo: Annotated[str, typer.Option(help="Specific repo to mirror")] = None,
-    include_forks: Annotated[bool, typer.Option("--include-forks", help="Include mirroring forks")] = False,
+    include_forks: Annotated[
+        bool, typer.Option("--include-forks", help="Include mirroring forks")
+    ] = False,
 ) -> None:
     """
     Mirror all of the repositories from Github to Gitea.
