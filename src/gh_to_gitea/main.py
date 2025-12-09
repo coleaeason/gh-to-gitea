@@ -5,11 +5,11 @@ from typing_extensions import Annotated
 from rich import print
 from rich.status import Status
 
-from cli import __version__
+from gh_to_gitea import __version__
 from .gh import GithubAPI
 from .gitea import GiteaAPI
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
 # Value looks useless here and it sort of is, but
@@ -18,7 +18,7 @@ app = typer.Typer()
 # a neat hack to provide `version` as a command and
 # as a cli flag option `--version`
 @app.command(name="version")
-def version_callback(value: bool = True):
+def version_callback(value: bool = True) -> None:
     """
     Prints version and exsits.
     """
@@ -69,7 +69,7 @@ def cb(
         str,
         typer.Option("--gt-url", help="URL for the Gitea Instance", envvar="GT_URL"),
     ] = ...,
-):
+) -> None:
     """
     Mirror Github repositories to Gitea.
 
@@ -87,7 +87,8 @@ def cb(
 def mirror(
     ctx: typer.Context,
     repo: Annotated[str, typer.Option(help="Specific repo to mirror")] = None,
-):
+    include_forks: Annotated[bool, typer.Option("--include-forks", help="Include mirroring forks")] = False,
+) -> None:
     """
     Mirror all of the repositories from Github to Gitea.
 
@@ -106,7 +107,7 @@ def mirror(
     with Status("Mirroring repositories"):
         for repo_to_clone in [gh.get_repo(repo)] if repo else gh.get_repos():
             print(f":eyes: Looking at repo {repo_to_clone.name}")
-            if not repo_to_clone.fork:
+            if not (include_forks and repo_to_clone.fork):
                 data = {
                     "repo_name": repo_to_clone.name,
                     "description": (
