@@ -56,7 +56,7 @@ class GiteaAPI:
         r = self.session.get(f"{self.url}/user")
         return r.json()
 
-    def create_repo(self, data: object, isPrivate: bool) -> None:
+    def create_repo(self, data: dict, isPrivate: bool) -> None:
         """
         Create a repository on Gitea with the given data.
 

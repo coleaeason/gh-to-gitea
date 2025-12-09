@@ -1,6 +1,5 @@
 import typer
-from typing import Optional
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Optional
 
 from rich import print
 from rich.status import Status
@@ -9,14 +8,9 @@ from gh_to_gitea import __version__
 from .gh import GithubAPI
 from .gitea import GiteaAPI
 
-app = typer.Typer(pretty_exceptions_show_locals=False)
+app = typer.Typer(pretty_exceptions_show_locals=False, no_args_is_help=True)
 
 
-# Value looks useless here and it sort of is, but
-# its required because typer will pass in a param
-# to an option callback. This is also a command as
-# a neat hack to provide `version` as a command and
-# as a cli flag option `--version`
 @app.command(name="version")
 def version_callback(value: bool = True) -> None:
     """
@@ -31,15 +25,16 @@ def version_callback(value: bool = True) -> None:
 def cb(
     ctx: typer.Context,
     # Version must come first so that is_eager works correctly
-    version: Annotated[
+    _version: Annotated[
         Optional[bool],
         typer.Option(
             "--version",
             callback=version_callback,
             is_eager=True,
             help="Print the version and exit",
+            hidden=True,
         ),
-    ] = None,
+    ] = False,
     # This is a pre-optimization but we collect these at the root level
     # and store them in the context object incase we add more commands
     # in the future, as they will likely also need all of the same credentials.
@@ -50,13 +45,13 @@ def cb(
             help="Access Token for Github API",
             envvar="GH_ACCESS_TOKEN",
         ),
-    ] = ...,
+    ] = "",
     gh_user_name: Annotated[
         str,
         typer.Option(
             "--gh-user-name", help="Username for Github API", envvar="GH_USERNAME"
         ),
-    ] = ...,
+    ] = "",
     gt_access_token: Annotated[
         str,
         typer.Option(
@@ -64,11 +59,11 @@ def cb(
             help="Access Token for Gitea API",
             envvar="GT_ACCESS_TOKEN",
         ),
-    ] = ...,
+    ] = "",
     gt_url: Annotated[
         str,
         typer.Option("--gt-url", help="URL for the Gitea Instance", envvar="GT_URL"),
-    ] = ...,
+    ] = "",
 ) -> None:
     """
     Mirror Github repositories to Gitea.
@@ -86,7 +81,7 @@ def cb(
 @app.command()
 def mirror(
     ctx: typer.Context,
-    repo: Annotated[str, typer.Option(help="Specific repo to mirror")] = None,
+    repo: Annotated[str, typer.Option(help="Specific repo to mirror")] = "",
     include_forks: Annotated[
         bool, typer.Option("--include-forks", help="Include mirroring forks")
     ] = False,
