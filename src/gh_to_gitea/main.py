@@ -1,6 +1,10 @@
+"""
+CLI tool for mirroring Github repositories to Gitea.
+"""
 import typer
 from typing_extensions import Annotated, Optional
 
+# pylint: disable=redefined-builtin
 from rich import print
 from rich.status import Status
 
